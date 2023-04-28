@@ -1,2 +1,2 @@
-# auth-system-api
-backend api that provides basic authentication for websites. Includes CRUD routes which are protected by auth middlewares. 
+# superchat-ai-api
+backend ai chat-completion system using openai gpt-3.5-turbo model api. Includes CRUD routes protected using jwt auth.
