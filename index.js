@@ -3,11 +3,10 @@ const cors = require("cors");
 const express = require("express");
 const mongoose = require("mongoose");
 
-const app = express();
+const chatRoutes = require("./routes/chatRoutes");
+const userRoutes = require("./routes/userRoutes");
 
-// Middlewares
-app.use(cors());
-app.use(express.json());
+const app = express();
 
 // Connect To Database
 mongoose.connect(process.env.DB_STRING)
@@ -20,5 +19,10 @@ mongoose.connect(process.env.DB_STRING)
         console.error(`Error connnecting to MongoDB: ${ error.message }` );
     });
 
+// Middlewares
+app.use(cors());
+app.use(express.json());
 
-// Routes
+// Main routes
+app.use("/api/gpt", chatRoutes);
+app.use("/api/user", userRoutes);

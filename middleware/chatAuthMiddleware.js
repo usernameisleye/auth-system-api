@@ -11,7 +11,7 @@ const chatAuthMiddleware = async (req, res, next) => {
     const token = authorization.split(" ")[1]; //Getting JWT token from auth string
 
     try{
-        const{_id} = jwt.verify(token, process.env.SECRET); //Retriving payload
+        const{ _id } = jwt.verify(token, process.env.SECRET); //Retriving payload
 
         req.user = await User.findOne({ _id }).select("_id"); //Storing _id in req user obj
         next();

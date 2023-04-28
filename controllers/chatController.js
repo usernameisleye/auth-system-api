@@ -1,5 +1,6 @@
 const Chat = require("../models/chatModel");
 
+
 // Getting all chats 
 const get_all_chats = async (req, res) => {
     const user_id = req.user._id; //Getting auth _id from req user object
@@ -29,7 +30,6 @@ const get_chat = async (req, res) =>{
 // Chat System
 const send_chat = async (req, res) => {
     const { message } = req.body;
-    const user_id = req.user._id;
 
     const options = {
         method: "POST",
@@ -48,6 +48,8 @@ const send_chat = async (req, res) => {
     };
 
     try{
+        const user_id = req.user._id;
+
         const response = await fetch("https://api.openai.com/v1/chat/completions", options);
         const data = await response.json();
 
@@ -93,8 +95,8 @@ const update_chat = async (req, res) => {
 
 module.exports = {
     get_all_chats,
-    get_chat,
     send_chat,
+    get_chat,
     delete_chat,
     update_chat
 };
