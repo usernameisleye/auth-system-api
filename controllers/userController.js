@@ -1,74 +1,100 @@
 const User = require("../models/userModel");
-
-const validator = require("validator");
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const createJWT = ( _id) => { //Function creating JWTs
-    return jwt.sign({ _id }, process.env.SECRET, { expiresIn: "7d" })
+const createJWT = ( res, _id) => { //Function creating JWTs
+    const token = jwt.sign({ _id }, process.env.SECRET, { 
+        expiresIn: "7d" 
+    });
+
+    // Cookie
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 7);
+
+    res.cookie('jwt', token, { 
+        httpOnly: true,
+        sameSite: "Strict",
+        path: "/",
+        expires: expirationDate
+    });
 }
 
+// Signup user
 const user_signup = async (req, res) => {
-    const { email, password } = req.body;
+    const { 
+        username, 
+        email, 
+        password 
+    } = req.body;
 
     try{
-        if(!email || !password){
-            throw Error("Fill in all fields");
-        }
-        if(!validator.isEmail(email)){
-            throw Error("Invalid email address");
-        }
-        if(!validator.isStrongPassword(password)){
-            throw Error("Password is not strong enough");
-        }
-
         // If email exists
         const exists = await User.findOne({ email });
         if(exists){
-            throw Error("Email address already exists");
+            throw Error("User already exists");
         }
-        
 
-        const salt = await bcrypt.genSalt(10);
-        const hash = await bcrypt.hash(password, salt); //Hashing salt with password
+        const user = await User.create({ 
+            username, 
+            email, 
+            password 
+        });
+        createJWT(res, user._id);
 
-        const user = await User.create({ email, password: hash });
-
-        const token = createJWT(user._id); //Creating token
-        res.status(200).json({ email, token });
+        if(user){
+            res.status(200).json({ 
+                username,
+                email 
+            });
+        }else{
+            res.status(400);
+            throw Error("Invalid credentials");
+        }
     }
     catch(error){
-        res.status(400).json(error);
+        res.status(400).json({ 
+            error: error.message 
+        });
     }
 };
 
+// Login user
 const user_login = async (req, res) => {
     const { email, password } = req.body;
 
     try{
-        if(!email || !password){
-            throw Error("Fill in all fields");
-        }
-
         const user = await User.findOne({ email });
-        if(!user){
-            throw Error("Invalid email address");
-        }
 
-        const compare = await bcrypt.compare(password, user.password); //Comparing passwords
-        if(!compare){
-            throw Error("Invalid password, try again");
-        }
+        if(user && (await user.compare(password))){
+            createJWT(res, user._id);
 
-        const token = createJWT(user._id);
-        res.status(200).json({email, token});
+            res.status(201).json({ email });
+        }else{
+            res.status(401)
+            .json({ 
+                error: "Invalid email or password"
+             });
+        }
     }
     catch(error){
-        res.status(400).json(error);
+        res.status(400).json({ 
+            error: error.message 
+        });
     }
 };
 
+const user_logout = async (req, res) => {
+    res.cookie("jwt", "", {
+        httpOnly: true,
+        expires: new Date(0)
+    });
+
+    res.status(200).json({
+        msg: "User logged out"
+    })
+}
+
 module.exports = {
+    user_signup,
     user_login,
-    user_signup
+    user_logout
 }

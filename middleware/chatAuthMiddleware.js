@@ -2,23 +2,30 @@ const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 
 const chatAuthMiddleware = async (req, res, next) => {
-    const { authorization } = req.headers; //Destructuring auth header from req
+    let token;
 
-    if(!authorization){
-        return res.status(401).json({error: "Authorization header is missing from the request"});
-    };
+    // Retieving token from request cookies
+    token = req.cookies.jwt;
 
-    const token = authorization.split(" ")[1]; //Getting JWT token from auth string
-
-    try{
-        const{ _id } = jwt.verify(token, process.env.SECRET); //Retriving payload
-
-        req.user = await User.findOne({ _id }).select("_id"); //Storing _id in req user obj
-        next();
+    if(token){
+        try{
+            const { _id } = jwt.verify(token, process.env.SECRET);
+    
+            req.user = await User.findById( _id ).select("_id");
+            next();
+        }
+        catch(error){
+            res.status(401)
+            .json({
+                error: "Unauthorized request, Invalid token"
+            });
+        }
     }
-    catch(error){
-        console.error(error);
-        res.status(401).json({error: "Unauthorized request"})
+    else{
+        res.status(401)
+        .json({
+            error: "Unauthorized request, No token found"
+        });
     }
 }
 

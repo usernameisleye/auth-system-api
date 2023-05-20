@@ -3,14 +3,19 @@ const Chat = require("../models/chatModel");
 
 // Getting all chats 
 const get_all_chats = async (req, res) => {
-    const user_id = req.user._id; //Getting auth _id from req user object
+    const user_id = req.user._id;
 
     try{
-        const chats = await Chat.find({user_id}).sort({createdAt: -1});
+        const chats = await Chat.find({ user_id })
+        .sort({createdAt: -1});
+
         res.status(200).json(chats);
     }
     catch(error){
-        res.status(400).json(error);
+        res.status(400)
+        .json({ 
+            error: error.message
+        });
     }
 };
 
@@ -23,7 +28,10 @@ const get_chat = async (req, res) =>{
         res.status(200).json(chat);
     }
     catch(error){
-        res.status(400).json(error);
+        res.status(400)
+        .json({ 
+            error: error.message
+        });
     }
 };
 
@@ -57,13 +65,22 @@ const send_chat = async (req, res) => {
         const chat_role = data.choices[0].message.role;
         const chat_message = data.choices[0].message.content;
 
-        await Chat.create({ user_id, user_role: "user", user_message: message , chat_role, chat_message });
+        await Chat.create({ 
+            user_id, 
+            user_role: "user", 
+            user_message: message , 
+            chat_role, 
+            chat_message 
+        });
 
         res.status(200).json(data);
     }
     catch(error){
         console.error(error);
-        res.status(400).json(error);
+        res.status(400)
+        .json({ 
+            error: error.message
+        });
     }
 };
 
@@ -76,7 +93,10 @@ const delete_chat = async (req, res) => {
         res.status(200).json(chat);
     }
     catch(error){
-        res.status(400).json(error);
+        res.status(400)
+        .json({ 
+            error: error.message
+        });
     }
 };
 
@@ -85,11 +105,18 @@ const update_chat = async (req, res) => {
     const { id } = req.body;
 
     try{
-        const chat = await Chat.findOneAndUpdate({ _id: id }, { ...req.body });
+        const chat = await Chat.findOneAndUpdate(
+            { _id: id }, 
+            { ...req.body }
+            );
+
         res.status(200).json(chat);
     }
     catch(error){
-        res.status(400).json(error);
+        res.status(400)
+        .json({ 
+            error: error.message
+        });
     }
 };
 

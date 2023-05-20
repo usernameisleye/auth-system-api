@@ -10,18 +10,17 @@ const {
 } = require("../controllers/chatController");
 const chatAuthMiddleware = require("../middleware/chatAuthMiddleware");
 
-//Auth middleware🚧  
 router.use(chatAuthMiddleware);
-
 // Routes
-router.get("/", get_all_chats);
+router
+.route("/")
+.get(get_all_chats)
+.post(send_chat)
 
-router.post("/", send_chat);
-
-router.get("/:id", get_chat);
-
-router.delete("/:id", delete_chat);
-
-router.patch("/:id", update_chat);
+router
+.route(":/id")
+.get(get_chat)
+.delete(delete_chat)
+.patch(update_chat)
 
 module.exports = router;
