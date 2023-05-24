@@ -4,10 +4,12 @@ const Schema = mongoose.Schema;
 const chatSchema = new Schema({
     user_id: {
         type: String,
+        trim: true,
         required: true
     },
     user_role: {
         type: String,
+        trim: true,
         required: true
     },
     user_message: {
@@ -16,12 +18,15 @@ const chatSchema = new Schema({
     },
     chat_role: {
         type: String,
+        trim: true,
         required: true
     },
     chat_message: {
         type: String,
         required: true
     }
-}, { timestamps: true });
+}, { 
+    timestamps: true 
+});
 
 module.exports = mongoose.model("Chat", chatSchema);

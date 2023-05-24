@@ -1,5 +1,5 @@
 const Chat = require("../models/chatModel");
-
+let API_KEY = process.env.API_KEY;
 
 // Getting all chats 
 const get_all_chats = async (req, res) => {
@@ -42,7 +42,7 @@ const send_chat = async (req, res) => {
     const options = {
         method: "POST",
         headers: {
-            "Authorization": `Bearer ${process.env.API_KEY}`, //Auth header sent to openAI
+            "Authorization": `Bearer ${API_KEY}`, //Auth header sent to openAI
             "Content-Type": "application/json"
         },
         body: JSON.stringify({

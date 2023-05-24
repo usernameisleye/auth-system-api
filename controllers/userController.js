@@ -1,49 +1,23 @@
 const User = require("../models/userModel");
-const jwt = require("jsonwebtoken");
-
-const createJWT = ( res, _id) => { //Function creating JWTs
-    const token = jwt.sign({ _id }, process.env.SECRET, { 
-        expiresIn: "7d" 
-    });
-
-    // Cookie
-    const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() + 7);
-
-    res.cookie('jwt', token, { 
-        httpOnly: true,
-        sameSite: "Strict",
-        path: "/",
-        expires: expirationDate
-    });
-}
+const createJWT = require("../utils/generateJWT");
 
 // Signup user
 const user_signup = async (req, res) => {
-    const { 
-        username, 
-        email, 
-        password 
-    } = req.body;
-
+    const {email} = req.body;
     try{
         // If email exists
-        const exists = await User.findOne({ email });
-        if(exists){
+        let user = await User.findOne({ email });
+        if(user){
             throw Error("User already exists");
         }
 
-        const user = await User.create({ 
-            username, 
-            email, 
-            password 
-        });
+        user = await User.create({...req.body});
         createJWT(res, user._id);
 
         if(user){
             res.status(200).json({ 
-                username,
-                email 
+                email: user.email,
+                username: user.username
             });
         }else{
             res.status(400);
@@ -60,14 +34,14 @@ const user_signup = async (req, res) => {
 // Login user
 const user_login = async (req, res) => {
     const { email, password } = req.body;
-
     try{
         const user = await User.findOne({ email });
 
         if(user && (await user.compare(password))){
             createJWT(res, user._id);
 
-            res.status(201).json({ email });
+            res.status(201)
+            .json({ email: user.email });
         }else{
             res.status(401)
             .json({ 
